@@ -1,0 +1,3 @@
+ 1. Cài đặt logo + link tải zalo, nạp, Downloads trong Controllers/Configs.php
+ 2. Cài đặt link nạp card, quét thẻ.... trong Payment.php
+ 
