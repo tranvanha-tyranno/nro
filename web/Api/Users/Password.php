@@ -2,11 +2,12 @@
 include '../../Controllers/Connections.php';
 include '../../Controllers/Sessions.php';
 
-header('Content-Type: application/json');
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    webJsonResponse(['success' => false, 'message' => 'Yêu cầu không hợp lệ.'], 405);
+}
 
 if ($_Login === null || $_Id === null) {
-    echo json_encode(['success' => false, 'message' => 'Bạn cần đăng nhập trước.']);
-    exit;
+    webJsonResponse(['success' => false, 'message' => 'Bạn cần đăng nhập trước.'], 401);
 }
 
 $postData = json_decode(file_get_contents('php://input'), true) ?: [];
@@ -15,23 +16,19 @@ $newPassword = trim($postData['newpassword'] ?? '');
 $confirmPassword = trim($postData['newpassword_confirm'] ?? '');
 
 if ($currentPassword !== $_Password) {
-    echo json_encode(['success' => false, 'message' => 'Mật khẩu hiện tại không đúng.']);
-    exit;
+    webJsonResponse(['success' => false, 'message' => 'Mật khẩu hiện tại không đúng.'], 422);
 }
 
 if (!isValidInput($newPassword)) {
-    echo json_encode(['success' => false, 'message' => 'Mật khẩu mới chỉ được dùng chữ, số và dấu gạch dưới.']);
-    exit;
+    webJsonResponse(['success' => false, 'message' => 'Mật khẩu mới chỉ được dùng chữ, số và dấu gạch dưới.'], 422);
 }
 
 if ($newPassword !== $confirmPassword) {
-    echo json_encode(['success' => false, 'message' => 'Mật khẩu xác nhận chưa khớp.']);
-    exit;
+    webJsonResponse(['success' => false, 'message' => 'Mật khẩu xác nhận chưa khớp.'], 422);
 }
 
 if ($newPassword === $currentPassword) {
-    echo json_encode(['success' => false, 'message' => 'Mật khẩu mới phải khác mật khẩu cũ.']);
-    exit;
+    webJsonResponse(['success' => false, 'message' => 'Mật khẩu mới phải khác mật khẩu cũ.'], 422);
 }
 
 $stmt = $conn->prepare("UPDATE account SET password = :password WHERE id = :id");
@@ -40,7 +37,7 @@ $stmt->execute([
     'id' => $_Id,
 ]);
 
-echo json_encode([
+webJsonResponse([
     'success' => true,
     'message' => 'Đổi mật khẩu thành công.'
 ]);

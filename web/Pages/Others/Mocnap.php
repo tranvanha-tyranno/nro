@@ -1,59 +1,35 @@
+<?php include '../../Controllers/Header.php'; ?>
+
 <?php
-include '../../Controllers/Header.php';
+$rewards = [
+    ['milestone' => '20.000đ', 'reward' => 'Danh hiệu Fan Cứng'],
+    ['milestone' => '50.000đ', 'reward' => 'Thiên Kiếm'],
+    ['milestone' => '100.000đ', 'reward' => 'Thú cưỡi Thanh Long'],
+    ['milestone' => '200.000đ', 'reward' => 'Katana'],
+    ['milestone' => '500.000đ', 'reward' => 'Đồ Long Đao'],
+    ['milestone' => '1.000.000đ', 'reward' => 'Danh hiệu Đại Gia'],
+];
 ?>
 
-<div class="card">
-  <div class="card-body">
-    <div class="d-flex align-items-center">
-      <div class="post-image d-none d-sm-block"><img src="../../Assets/Images/logo.png">
-        <div class="post-author">Admin</div>
-      </div>
-      <div class="post-detail flex-fill">
-        <div class="fw-bold text-primary">Mốc Nạp</div>
-
-        <div class="post-content">
-          <div class="container">
-            <table class="table table-bordered table-responsive">
-              <thead>
-                <tr>
-                  <th scope="col">Mốc nạp</th>
-                  <th scope="col">Phần thưởng</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="white-space: nowrap;">Mốc 20k</td>
-                  <td style="white-space: nowrap;">Nhận Danh hiệu Fan Cứng</td>
-                </tr>
-                <tr>
-                  <td style="white-space: nowrap;">Mốc 50k</td>
-                  <td style="white-space: nowrap;">Nhận Thiên Kiếm</td>
-                </tr>
-                <tr>
-                  <td style="white-space: nowrap;">Mốc 100k</td>
-                  <td style="white-space: nowrap;">Nhận Thú cưỡi Thanh Long</td>
-                </tr>
-                <tr>
-                  <td style="white-space: nowrap;">Mốc 200k</td>
-                  <td style="white-space: nowrap;">Nhận Katana</td>
-                </tr>
-                <tr>
-                  <td style="white-space: nowrap;">Mốc 500k</td>
-                  <td style="white-space: nowrap;">Nhận Đồ Long Đao</td>
-                </tr>
-                <tr>
-                  <td style="white-space: nowrap;">Mốc 1M</td>
-                  <td style="white-space: nowrap;">Nhận Danh hiệu Đại Gia</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+<section class="panel">
+    <div class="panel-header">
+        <div>
+            <h2 class="panel-title">Mốc nạp</h2>
+            <p class="panel-subtitle">Danh sách quà thưởng theo tổng nạp. Admin có thể chỉnh nội dung trực tiếp trong file này.</p>
         </div>
-      </div>
+        <a class="btn btn-primary" href="<?= $_Login ? '/Users/Payment' : '/Auth/Login' ?>">Nạp tiền</a>
     </div>
-  </div>
-</div>
+    <div class="panel-body">
+        <div class="reward-grid">
+            <?php foreach ($rewards as $item) { ?>
+                <div class="info-card">
+                    <span>Mốc nạp</span>
+                    <strong><?= htmlspecialchars($item['milestone'], ENT_QUOTES, 'UTF-8') ?></strong>
+                    <p class="help"><?= htmlspecialchars($item['reward'], ENT_QUOTES, 'UTF-8') ?></p>
+                </div>
+            <?php } ?>
+        </div>
+    </div>
+</section>
 
-<?php
-include '../../Controllers/Footer.php';
-?>
+<?php include '../../Controllers/Footer.php'; ?>

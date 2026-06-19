@@ -1,86 +1,72 @@
-<?php
-include '../../Controllers/Header.php';
-?>
-<div class="container pb-5">
-    <div class="col-md-12">
-        <form class="form-horizontal" onsubmit="event.preventDefault(); ChangePass();">
-            <div class="card">
-                <div class="card-body">
-                    <h3 class="mt-0 mb-20" style="text-align: center">Đổi mật khẩu</h3>
-                    <div class="mb-3">
-                        <label class="font-weight-bold">Mật khẩu cũ</label>
-                        <input class="form-control" type="password" name="current_password"
-                            placeholder="Mật khẩu hiện tại" minlength="3" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="font-weight-bold">Mật khẩu mới</label>
-                        <input class="form-control" type="password" name="newpassword"
-                            placeholder="Mật khẩu mới bạn muốn" minlength="3" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="font-weight-bold">Xác nhận</label>
-                        <input class="form-control" type="password" name="newpassword_confirm"
-                            placeholder="Xác nhận mật khẩu mới bạn muốn" minlength="3" required>
-                    </div>
+<?php include '../../Controllers/Header.php'; ?>
 
-                    <div style="text-align: center">
-                        <button type="submit" style="display: block; margin: 0 auto; border: 2px solid #8BC34A; background-color: #C5E1A5; color: #FFFFFF; padding: 5px 20px; font-size: 16px; border-radius: 5px; cursor: pointer;">ĐỔI MẬT KHẨU</button>
+<div class="auth-wrap">
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <h2 class="panel-title">Đổi mật khẩu</h2>
+                <p class="panel-subtitle">Mật khẩu mới chỉ dùng chữ, số và dấu gạch dưới để khớp luật tài khoản hiện tại.</p>
+            </div>
+        </div>
+        <div class="panel-body">
+            <form class="form-grid" onsubmit="event.preventDefault(); ChangePass();">
+                <div class="field">
+                    <label for="current_password">Mật khẩu cũ</label>
+                    <input id="current_password" class="input" type="password" name="current_password" placeholder="Mật khẩu hiện tại" minlength="3" required>
+                </div>
+                <div class="form-grid two-col">
+                    <div class="field">
+                        <label for="newpassword">Mật khẩu mới</label>
+                        <input id="newpassword" class="input" type="password" name="newpassword" placeholder="Mật khẩu mới" minlength="3" required>
+                    </div>
+                    <div class="field">
+                        <label for="newpassword_confirm">Xác nhận</label>
+                        <input id="newpassword_confirm" class="input" type="password" name="newpassword_confirm" placeholder="Nhập lại mật khẩu mới" minlength="3" required>
                     </div>
                 </div>
-            </div>
-        </form>
-    </div>
-    <script>
-        function ChangePass() {
-            var current_password = document.querySelector("[name=current_password]").value;
-            var newpassword = document.querySelector("[name=newpassword]").value;
-            var newpassword_confirm = document.querySelector("[name=newpassword_confirm]").value;
-            var username = '<?= $_Username ?>';
-
-            var isValid = passwordCheck(current_password, newpassword, newpassword_confirm);
-            if (isValid) {
-                fetch('/Api/Password', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        current_password: current_password, // Thêm trường này để gửi mật khẩu hiện tại
-                        newpassword: newpassword,
-                        newpassword_confirm: newpassword_confirm,
-                        username: username,
-                    })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showCustomToast(data.message, 'success');
-                        } else {
-                            showCustomToast(data.message, 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showCustomToast('Có lỗi xảy ra. Vui lòng thử lại sau.', 'error');
-                    });
-            }
-        }
-
-        function passwordCheck(current_password, newpassword, newpassword_confirm) {
-            var hasSpecialChar = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-            var hasUpperCase = /[A-Z]/;
-
-            if (hasSpecialChar.test(newpassword) || hasUpperCase.test(newpassword)) {
-                showCustomToast('Mật khẩu không được chứa ký tự đặc biệt hoặc chữ hoa');
-                return false;
-            } else if (newpassword !== newpassword_confirm) {
-                showCustomToast('Mật khẩu mới không khớp');
-                return false;
-            }
-            return true;
-        }
-    </script>
+                <button class="btn btn-primary" type="submit">Đổi mật khẩu</button>
+            </form>
+        </div>
+    </section>
 </div>
-<?php
-include '../../Controllers/Footer.php';
-?>
+
+<script>
+function ChangePass() {
+    const current_password = document.querySelector("[name=current_password]").value;
+    const newpassword = document.querySelector("[name=newpassword]").value;
+    const newpassword_confirm = document.querySelector("[name=newpassword_confirm]").value;
+
+    if (!passwordCheck(newpassword, newpassword_confirm)) {
+        return;
+    }
+
+    fetch('/Api/Password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            current_password: current_password,
+            newpassword: newpassword,
+            newpassword_confirm: newpassword_confirm
+        })
+    })
+    .then(response => response.json())
+    .then(data => showCustomToast(data.message, data.success ? 'success' : 'error'))
+    .catch(() => showCustomToast('Có lỗi xảy ra. Vui lòng thử lại sau.', 'error'));
+}
+
+function passwordCheck(newpassword, newpassword_confirm) {
+    if (!/^[a-zA-Z0-9_]+$/.test(newpassword)) {
+        showCustomToast('Mật khẩu mới chỉ được dùng chữ, số và dấu gạch dưới.', 'error');
+        return false;
+    }
+
+    if (newpassword !== newpassword_confirm) {
+        showCustomToast('Mật khẩu mới không khớp.', 'error');
+        return false;
+    }
+
+    return true;
+}
+</script>
+
+<?php include '../../Controllers/Footer.php'; ?>

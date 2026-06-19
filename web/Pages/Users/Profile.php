@@ -1,43 +1,106 @@
 <?php include '../../Controllers/Header.php'; ?>
 
-<div class="row g-3">
-    <div class="col-lg-6">
-        <div class="site-panel p-3 h-100">
-            <div class="h5 mb-3">Thông tin tài khoản</div>
-            <table class="table mb-0">
-                <tr><th>ID</th><td><?= (int) $_Id ?></td></tr>
-                <tr><th>Tài khoản</th><td><?= htmlspecialchars($_Username, ENT_QUOTES, 'UTF-8') ?></td></tr>
-                <tr><th>Email</th><td><?= $_Email ? htmlspecialchars($_Email, ENT_QUOTES, 'UTF-8') : 'Chưa cập nhật' ?></td></tr>
-                <tr><th>Số dư</th><td class="text-danger fw-bold"><?= webFormatCurrency($_BalanceVnd) ?></td></tr>
-                <tr><th>Tổng nạp</th><td class="text-danger fw-bold"><?= webFormatCurrency($_TCoins) ?></td></tr>
-                <tr><th>Thỏi vàng</th><td><?= webFormatNumber($_ThoiVang) ?></td></tr>
-                <tr><th>Trạng thái</th><td><?= $_Status ? 'Đã kích hoạt' : 'Chưa kích hoạt' ?></td></tr>
-            </table>
-            <div class="mt-3 d-flex gap-2 flex-wrap">
-                <a href="/Users/ChangePassword" class="btn btn-outline-primary">Đổi mật khẩu</a>
-                <a href="/Users/History" class="btn btn-outline-secondary">Lịch sử giao dịch</a>
+<div class="panel-grid">
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <h2 class="panel-title">Thông tin tài khoản</h2>
+                <p class="panel-subtitle">Các thông tin quan trọng nhất được gom lại để nhìn vào là hiểu.</p>
+            </div>
+            <div class="status-pill <?= $_Status ? 'status-ok' : 'status-warn' ?>">
+                <?= $_Status ? 'Đã kích hoạt' : 'Chưa kích hoạt' ?>
             </div>
         </div>
-    </div>
+        <div class="panel-body stack">
+            <div class="summary-grid">
+                <div class="stat-card">
+                    <label>ID tài khoản</label>
+                    <strong><?= (int) $_Id ?></strong>
+                </div>
+                <div class="stat-card">
+                    <label>Username</label>
+                    <strong><?= htmlspecialchars($_Username, ENT_QUOTES, 'UTF-8') ?></strong>
+                </div>
+                <div class="stat-card">
+                    <label>Số dư</label>
+                    <strong><?= webFormatCurrency($_BalanceVnd) ?></strong>
+                </div>
+                <div class="stat-card">
+                    <label>Tổng nạp</label>
+                    <strong><?= webFormatCurrency($_TCoins) ?></strong>
+                </div>
+                <div class="stat-card">
+                    <label>Thỏi vàng</label>
+                    <strong><?= webFormatNumber($_ThoiVang) ?></strong>
+                </div>
+                <div class="stat-card">
+                    <label>Điểm sự kiện</label>
+                    <strong><?= webFormatNumber($_EventPoint) ?></strong>
+                </div>
+            </div>
 
-    <div class="col-lg-6">
-        <div class="site-panel p-3 h-100">
-            <div class="h5 mb-3">Thông tin nhân vật</div>
-            <?php if ($_Player) { ?>
-                <table class="table mb-0">
-                    <tr><th>Tên nhân vật</th><td><?= htmlspecialchars($_PlayerName, ENT_QUOTES, 'UTF-8') ?></td></tr>
-                    <tr><th>ID nhân vật</th><td><?= (int) $_Player['id'] ?></td></tr>
-                    <tr><th>Sức mạnh</th><td><?= webFormatNumber($_PlayerPower) ?></td></tr>
-                    <tr><th>HP</th><td><?= webFormatNumber(webJsonStat($_Player['data_point'] ?? '[]', 2)) ?></td></tr>
-                    <tr><th>KI</th><td><?= webFormatNumber(webJsonStat($_Player['data_point'] ?? '[]', 4)) ?></td></tr>
-                    <tr><th>Giới tính</th><td><?= ['Trái Đất', 'Namek', 'Xayda'][$_Player['gender'] ?? 0] ?? 'Không rõ' ?></td></tr>
-                    <tr><th>Tạo lúc</th><td><?= htmlspecialchars($_Player['create_time'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td></tr>
-                </table>
-            <?php } else { ?>
-                <div class="text-muted">Tài khoản này chưa có nhân vật trong game.</div>
-            <?php } ?>
+            <div class="action-row">
+                <a class="btn btn-primary" href="/Users/Payment">Mở nạp tiền</a>
+                <a class="btn btn-secondary" href="/Users/History">Xem lịch sử</a>
+                <a class="btn btn-secondary" href="/Users/Gold">Đổi thỏi vàng</a>
+                <a class="btn btn-secondary" href="/Users/ChangePassword">Đổi mật khẩu</a>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <section class="stack">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <h2 class="panel-title">Nhân vật gắn với tài khoản</h2>
+                    <p class="panel-subtitle">Dữ liệu lấy trực tiếp từ bảng player của game server.</p>
+                </div>
+            </div>
+            <div class="panel-body">
+                <?php if ($_Player) { ?>
+                    <div class="summary-grid">
+                        <div class="stat-card">
+                            <label>Tên nhân vật</label>
+                            <strong><?= htmlspecialchars($_PlayerName, ENT_QUOTES, 'UTF-8') ?></strong>
+                        </div>
+                        <div class="stat-card">
+                            <label>Sức mạnh</label>
+                            <strong><?= webFormatNumber($_PlayerPower) ?></strong>
+                        </div>
+                        <div class="stat-card">
+                            <label>HP</label>
+                            <strong><?= webFormatNumber(webJsonStat($_Player['data_point'] ?? '[]', 2)) ?></strong>
+                        </div>
+                        <div class="stat-card">
+                            <label>KI</label>
+                            <strong><?= webFormatNumber(webJsonStat($_Player['data_point'] ?? '[]', 4)) ?></strong>
+                        </div>
+                    </div>
+                <?php } else { ?>
+                    <div class="callout callout-info">Tài khoản này chưa có nhân vật trong game.</div>
+                <?php } ?>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <h2 class="panel-title">Nhắc nhanh</h2>
+                    <p class="panel-subtitle">Một số lối vào người chơi thường cần sau khi đăng nhập.</p>
+                </div>
+            </div>
+            <div class="panel-body stack">
+                <a class="nav-link-card" href="/Others/Downloads">
+                    <strong>Tải hoặc cập nhật client</strong>
+                    <span>Mở trang tải game nếu bạn đang đăng nhập web từ máy mới.</span>
+                </a>
+                <a class="nav-link-card" href="/Others/Top">
+                    <strong>Xem vị trí của mình</strong>
+                    <span>Kiểm tra top sức mạnh và top nạp ngay trên web.</span>
+                </a>
+            </div>
+        </div>
+    </section>
 </div>
 
 <?php include '../../Controllers/Footer.php'; ?>

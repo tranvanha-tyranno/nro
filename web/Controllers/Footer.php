@@ -1,37 +1,65 @@
-<?php $canActivate = $_Login !== null && (int) $_Status === 0; ?>
-<?php if ($canActivate) { ?>
-<div class="site-panel p-3 mb-3">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-        <div>
-            <div class="fw-bold">Kích hoạt tài khoản</div>
-            <div class="text-muted">Mở khóa giao dịch web với phí 10.000đ từ số dư hiện có.</div>
+<?php
+$canActivate = $_Login !== null && (int) $_Status === 0;
+?>
+
+<?php if ($_Login !== null) { ?>
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <h2 class="panel-title">Tài khoản hiện tại</h2>
+                <p class="panel-subtitle">Các thông tin hay dùng được đặt ở cuối trang để thao tác nhanh.</p>
+            </div>
+            <?php if ($canActivate) { ?>
+                <button class="btn btn-primary" type="button" onclick="activateAccount()">Kích hoạt tài khoản</button>
+            <?php } ?>
         </div>
-        <button class="btn btn-success" onclick="activateAccount()">Kích hoạt ngay</button>
-    </div>
-</div>
+        <div class="panel-body">
+            <div class="summary-grid">
+                <div class="stat-card">
+                    <label>Tài khoản</label>
+                    <strong><?= htmlspecialchars($_Username, ENT_QUOTES, 'UTF-8') ?></strong>
+                </div>
+                <div class="stat-card">
+                    <label>Nhân vật</label>
+                    <strong><?= htmlspecialchars($_PlayerName ?: 'Chưa tạo', ENT_QUOTES, 'UTF-8') ?></strong>
+                </div>
+                <div class="stat-card">
+                    <label>Số dư</label>
+                    <strong><?= webFormatCurrency($_BalanceVnd) ?></strong>
+                </div>
+                <div class="stat-card">
+                    <label>Tổng nạp</label>
+                    <strong><?= webFormatCurrency($_TCoins) ?></strong>
+                </div>
+            </div>
+        </div>
+    </section>
 <?php } ?>
 
-<footer class="text-center py-4">
-    <div class="small text-muted">Chơi quá 180 phút mỗi ngày sẽ ảnh hưởng sức khỏe.</div>
-</footer>
+<div class="footer-note">
+    <div>Chơi quá 180 phút mỗi ngày sẽ ảnh hưởng sức khỏe.</div>
+    <?php if (!empty($_Zalo) && strpos($_Zalo, 'http') === 0) { ?>
+        <div style="margin-top:10px;">
+            <a class="btn btn-secondary btn-sm" href="<?= htmlspecialchars($_Zalo, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer">Nhóm hỗ trợ Zalo</a>
+        </div>
+    <?php } ?>
+</div>
 </div>
 
 <script>
 function showCustomToast(message, type) {
     const toast = document.getElementById('customToast');
-    toast.textContent = message;
-    toast.style.display = 'block';
-    toast.style.position = 'fixed';
-    toast.style.top = '20px';
-    toast.style.right = '20px';
-    toast.style.zIndex = '9999';
-    toast.style.padding = '12px 16px';
-    toast.style.borderRadius = '8px';
-    toast.style.color = '#fff';
-    toast.style.background = type === 'success' ? '#198754' : '#dc3545';
-    setTimeout(() => {
-        toast.style.display = 'none';
-    }, 2500);
+    if (!toast) {
+        alert(message);
+        return;
+    }
+
+    toast.textContent = message || 'Có lỗi xảy ra.';
+    toast.className = type === 'success' ? 'success' : 'error';
+    window.clearTimeout(window.__toastTimer);
+    window.__toastTimer = window.setTimeout(function () {
+        toast.className = 'hidden';
+    }, 2800);
 }
 
 function activateAccount() {
@@ -40,11 +68,11 @@ function activateAccount() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
     })
-    .then(response => response.json())
-    .then(data => {
+    .then((response) => response.json())
+    .then((data) => {
         showCustomToast(data.message, data.success ? 'success' : 'error');
         if (data.success) {
-            setTimeout(() => window.location.reload(), 800);
+            setTimeout(() => window.location.reload(), 900);
         }
     })
     .catch(() => showCustomToast('Không thể kích hoạt lúc này.', 'error'));

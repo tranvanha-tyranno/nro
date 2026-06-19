@@ -1,69 +1,89 @@
 <?php include '../../Controllers/Header.php'; ?>
 
-<div class="row g-3">
-    <div class="col-lg-6">
-        <div class="site-panel p-3 h-100">
-            <div class="h5 mb-3">Nạp thẻ cào</div>
-            <form onsubmit="event.preventDefault(); postCard();">
-                <div class="mb-3">
-                    <label class="form-label">Nhà mạng</label>
-                    <select class="form-select" id="telco" required>
-                        <option value="">Chọn nhà mạng</option>
-                        <option value="VIETTEL">Viettel</option>
-                        <option value="VINAPHONE">Vinaphone</option>
-                        <option value="MOBIFONE">Mobifone</option>
-                        <option value="GATE">Gate</option>
-                        <option value="ZING">Zing</option>
-                    </select>
+<div class="panel-grid">
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <h2 class="panel-title">Nạp thẻ cào</h2>
+                <p class="panel-subtitle">Nhập đúng nhà mạng, mệnh giá, mã thẻ và serial để hệ thống lưu yêu cầu xử lý.</p>
+            </div>
+            <span class="status-pill <?= (int) $_TrangThai === 1 ? 'status-ok' : 'status-off' ?>">
+                <?= (int) $_TrangThai === 1 ? 'Đang mở' : 'Bảo trì' ?>
+            </span>
+        </div>
+        <div class="panel-body stack">
+            <form class="form-grid" onsubmit="event.preventDefault(); postCard();">
+                <div class="form-grid two-col">
+                    <div class="field">
+                        <label for="telco">Nhà mạng</label>
+                        <select class="select" id="telco" required>
+                            <option value="">Chọn nhà mạng</option>
+                            <option value="VIETTEL">Viettel</option>
+                            <option value="VINAPHONE">Vinaphone</option>
+                            <option value="MOBIFONE">Mobifone</option>
+                            <option value="GATE">Gate</option>
+                            <option value="ZING">Zing</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="amount">Mệnh giá</label>
+                        <select class="select" id="amount" required>
+                            <option value="">Chọn mệnh giá</option>
+                            <option value="10000">10.000đ</option>
+                            <option value="20000">20.000đ</option>
+                            <option value="50000">50.000đ</option>
+                            <option value="100000">100.000đ</option>
+                            <option value="200000">200.000đ</option>
+                            <option value="500000">500.000đ</option>
+                            <option value="1000000">1.000.000đ</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Mệnh giá</label>
-                    <select class="form-select" id="amount" required>
-                        <option value="">Chọn mệnh giá</option>
-                        <option value="10000">10.000</option>
-                        <option value="20000">20.000</option>
-                        <option value="50000">50.000</option>
-                        <option value="100000">100.000</option>
-                        <option value="200000">200.000</option>
-                        <option value="500000">500.000</option>
-                        <option value="1000000">1.000.000</option>
-                    </select>
+                <div class="field">
+                    <label for="code">Mã thẻ</label>
+                    <input class="input" id="code" autocomplete="off" required>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Mã thẻ</label>
-                    <input class="form-control" id="code" required>
+                <div class="field">
+                    <label for="serial">Serial</label>
+                    <input class="input" id="serial" autocomplete="off" required>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Serial</label>
-                    <input class="form-control" id="serial" required>
+                <div class="action-row">
+                    <button class="btn btn-primary" type="submit">Gửi thẻ</button>
+                    <a href="/Users/History" class="btn btn-secondary">Xem lịch sử nạp</a>
                 </div>
-                <button class="btn btn-primary" type="submit">Gửi thẻ</button>
             </form>
-            <div class="mt-3">
-                <a href="/Users/History" class="btn btn-outline-secondary btn-sm">Xem lịch sử nạp</a>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <h2 class="panel-title">Chuyển khoản ngân hàng</h2>
+                <p class="panel-subtitle">Chuyển đúng nội dung để cron ngân hàng tự cộng tiền vào tài khoản.</p>
             </div>
         </div>
-    </div>
-
-    <div class="col-lg-6">
-        <div class="site-panel p-3 h-100">
-            <div class="h5 mb-3">Chuyển khoản ngân hàng</div>
-            <table class="table">
-                <tr><th>Ngân hàng</th><td><?= htmlspecialchars($_mbbank, ENT_QUOTES, 'UTF-8') ?></td></tr>
-                <tr><th>Số tài khoản</th><td><?= htmlspecialchars($stkmbbank_config, ENT_QUOTES, 'UTF-8') ?></td></tr>
-                <tr><th>Chủ tài khoản</th><td><?= htmlspecialchars($mbbank_name, ENT_QUOTES, 'UTF-8') ?></td></tr>
-                <tr><th>Nội dung</th><td><strong>naptien <?= (int) $_Id ?></strong></td></tr>
-            </table>
-            <div class="small text-muted mb-3">Chuyển đúng nội dung để cron ngân hàng tự cộng tiền vào `account.vnd` và `account.tongnap`.</div>
+        <div class="panel-body stack">
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Ngân hàng</th><td><?= htmlspecialchars($_mbbank, ENT_QUOTES, 'UTF-8') ?></td></tr>
+                    <tr><th>Số tài khoản</th><td><?= htmlspecialchars($stkmbbank_config, ENT_QUOTES, 'UTF-8') ?></td></tr>
+                    <tr><th>Chủ tài khoản</th><td><?= htmlspecialchars($mbbank_name, ENT_QUOTES, 'UTF-8') ?></td></tr>
+                    <tr><th>Nội dung</th><td><strong>naptien <?= (int) $_Id ?></strong></td></tr>
+                </table>
+            </div>
+            <div class="callout callout-info">Sau khi giao dịch được cron xử lý, tiền sẽ cộng vào số dư web và tổng nạp.</div>
             <?php if (!empty($stkmbbank_config) && !empty($mbbank_name) && $stkmbbank_config !== '123456789') { ?>
-                <img
-                    src="https://img.vietqr.io/image/MBBANK-<?= rawurlencode($stkmbbank_config) ?>-compact2.png?amount=0&addInfo=<?= rawurlencode('naptien ' . $_Id) ?>&accountName=<?= rawurlencode($mbbank_name) ?>"
-                    alt="QR ngân hàng"
-                    style="max-width: 280px; width: 100%; border-radius: 8px;"
-                >
+                <div class="qr-box">
+                    <img
+                        src="https://img.vietqr.io/image/MBBANK-<?= rawurlencode($stkmbbank_config) ?>-compact2.png?amount=0&addInfo=<?= rawurlencode('naptien ' . $_Id) ?>&accountName=<?= rawurlencode($mbbank_name) ?>"
+                        alt="QR ngân hàng"
+                    >
+                </div>
+            <?php } else { ?>
+                <div class="callout callout-danger">Thông tin ngân hàng vẫn đang dùng giá trị mẫu. Hãy cập nhật trong Configs.php trước khi nhận chuyển khoản thật.</div>
             <?php } ?>
         </div>
-    </div>
+    </section>
 </div>
 
 <script>

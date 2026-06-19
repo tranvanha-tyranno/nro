@@ -1,78 +1,109 @@
 <?php include 'Controllers/Header.php'; ?>
 
-<div class="row g-3">
-    <div class="col-lg-8">
-        <div class="site-panel p-3 h-100">
-            <div class="h5 mb-3">Tổng quan máy chủ</div>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <div class="status-card h-100">
-                        <div class="fw-bold mb-1">Tài khoản và nhân vật</div>
-                        <div class="text-muted small">Đăng ký, đăng nhập, xem hồ sơ, đổi mật khẩu và kiểm tra nhân vật đang gắn với tài khoản.</div>
-                        <div class="mt-3">
-                            <a href="<?= $_Login ? '/Users/Profile' : '/Auth/Register' ?>" class="btn btn-sm btn-danger"><?= $_Login ? 'Xem tài khoản' : 'Tạo tài khoản' ?></a>
-                        </div>
+<div class="panel-grid">
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <h2 class="panel-title">Lối vào nhanh</h2>
+                <p class="panel-subtitle">Các thao tác người chơi dùng nhiều nhất được gom lại để vào đúng màn chỉ sau một lần bấm.</p>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="quick-grid">
+                <div class="quick-card">
+                    <img class="card-icon" src="/Assets/Images/taigamengay.png" alt="">
+                    <strong>Tải game đúng nền tảng</strong>
+                    <span>Chọn bản Android, iPhone, Windows hoặc Java từ một màn duy nhất.</span>
+                    <div class="mt-3"><a class="btn btn-primary" href="/Others/Downloads">Mở trang tải game</a></div>
+                </div>
+                <div class="quick-card">
+                    <img class="card-icon" src="/Assets/Images/Top.png" alt="">
+                    <strong>Theo dõi bảng xếp hạng</strong>
+                    <span>Xem top sức mạnh và top nạp lấy trực tiếp từ dữ liệu game.</span>
+                    <div class="mt-3"><a class="btn btn-secondary" href="/Others/Top">Xem bảng xếp hạng</a></div>
+                </div>
+                <div class="quick-card">
+                    <img class="card-icon" src="/Assets/Images/trangchu1.png" alt="">
+                    <strong>Quản lý tài khoản</strong>
+                    <span><?= $_Login ? 'Xem hồ sơ, đổi mật khẩu, kiểm tra số dư và trạng thái kích hoạt.' : 'Đăng nhập hoặc đăng ký nhanh để quản lý nhân vật và số dư.' ?></span>
+                    <div class="mt-3">
+                        <a class="btn btn-secondary" href="<?= $_Login ? '/Users/Profile' : '/Auth/Login' ?>"><?= $_Login ? 'Mở tài khoản' : 'Đăng nhập ngay' ?></a>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="status-card h-100">
-                        <div class="fw-bold mb-1">Nạp và giao dịch</div>
-                        <div class="text-muted small">Nạp thẻ, chuyển khoản, xem lịch sử nạp và đổi số dư sang thỏi vàng dùng trong game.</div>
-                        <div class="mt-3">
-                            <a href="/Users/Payment" class="btn btn-sm btn-primary">Đi tới nạp tiền</a>
-                        </div>
-                    </div>
+                <div class="quick-card">
+                    <img class="card-icon" src="/Assets/Images/napthengay.png" alt="">
+                    <strong>Nạp tiền và đổi tài nguyên</strong>
+                    <span>Nạp thẻ, chuyển khoản và đổi sang thỏi vàng trên giao diện dễ thao tác.</span>
+                    <div class="mt-3"><a class="btn btn-secondary" href="<?= $_Login ? '/Users/Payment' : '/Auth/Login' ?>"><?= $_Login ? 'Mở nạp tiền' : 'Đăng nhập để nạp' ?></a></div>
                 </div>
-                <div class="col-md-6">
-                    <div class="status-card h-100">
-                        <div class="fw-bold mb-1">Bảng xếp hạng</div>
-                        <div class="text-muted small">Đọc trực tiếp từ dữ liệu game hiện tại: sức mạnh, tổng nạp và các mốc nhân vật nổi bật.</div>
-                        <div class="mt-3">
-                            <a href="/Others/Top" class="btn btn-sm btn-outline-danger">Xem BXH</a>
-                        </div>
-                    </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stack">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <h2 class="panel-title">Tình trạng hiện tại</h2>
+                    <p class="panel-subtitle">Tóm tắt nhanh trạng thái tài khoản trên web.</p>
                 </div>
-                <div class="col-md-6">
-                    <div class="status-card h-100">
-                        <div class="fw-bold mb-1">Tải client</div>
-                        <div class="text-muted small">Tập trung toàn bộ link Android, iPhone, Windows, Java về đúng một chỗ để người chơi tải nhanh.</div>
-                        <div class="mt-3">
-                            <a href="/Others/Downloads" class="btn btn-sm btn-outline-success">Tải game</a>
-                        </div>
+            </div>
+            <div class="panel-body">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <label>Đăng nhập</label>
+                        <strong><?= $_Login ? 'Đang online' : 'Khách' ?></strong>
+                    </div>
+                    <div class="stat-card">
+                        <label>Kích hoạt</label>
+                        <strong><?= $_Login ? ($_Status ? 'Đã mở' : 'Chưa mở') : 'Chưa có' ?></strong>
+                    </div>
+                    <div class="stat-card">
+                        <label>Nhân vật</label>
+                        <strong><?= htmlspecialchars($_PlayerName ?: 'Chưa tạo', ENT_QUOTES, 'UTF-8') ?></strong>
+                    </div>
+                    <div class="stat-card">
+                        <label>Sức mạnh</label>
+                        <strong><?= webFormatNumber($_PlayerPower ?? 0) ?></strong>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-lg-4">
-        <div class="site-panel p-3 mb-3">
-            <div class="h5 mb-3">Liên kết nhanh</div>
-            <div class="d-grid gap-2">
-                <a href="/Others/Downloads" class="btn btn-outline-primary">Tải game</a>
-                <a href="/Others/Top" class="btn btn-outline-primary">Bảng xếp hạng</a>
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <h2 class="panel-title">Thao tác nên dùng</h2>
+                    <p class="panel-subtitle">Đi thẳng vào đúng nơi thay vì dò lại trong menu.</p>
+                </div>
+            </div>
+            <div class="panel-body stack">
                 <?php if ($_Login) { ?>
-                    <a href="/Users/Profile" class="btn btn-outline-primary">Trang tài khoản</a>
-                    <a href="/Users/History" class="btn btn-outline-primary">Lịch sử giao dịch</a>
-                    <a href="/Users/Gold" class="btn btn-outline-primary">Đổi thỏi vàng</a>
+                    <a class="nav-link-card" href="/Users/History">
+                        <strong>Xem lịch sử giao dịch</strong>
+                        <span>Theo dõi nạp thẻ và giao dịch ngân hàng gần nhất.</span>
+                    </a>
+                    <a class="nav-link-card" href="/Users/Gold">
+                        <strong>Đổi thỏi vàng</strong>
+                        <span>Đổi số dư web sang tài nguyên trong game.</span>
+                    </a>
+                    <a class="nav-link-card" href="/Users/ChangePassword">
+                        <strong>Đổi mật khẩu</strong>
+                        <span>Cập nhật mật khẩu tài khoản nhanh và rõ trạng thái.</span>
+                    </a>
                 <?php } else { ?>
-                    <a href="/Auth/Login" class="btn btn-outline-primary">Đăng nhập</a>
-                    <a href="/Auth/Register" class="btn btn-outline-primary">Đăng ký</a>
+                    <a class="nav-link-card" href="/Auth/Register">
+                        <strong>Tạo tài khoản mới</strong>
+                        <span>Đăng ký nhanh, sau đó vào ngay khu người dùng.</span>
+                    </a>
+                    <a class="nav-link-card" href="/Auth/Login">
+                        <strong>Đăng nhập lại</strong>
+                        <span>Quay lại hồ sơ, nạp tiền và đổi thỏi vàng.</span>
+                    </a>
                 <?php } ?>
             </div>
         </div>
-
-        <div class="site-panel p-3">
-            <div class="h5 mb-3">Tình trạng liên kết</div>
-            <ul class="mb-0">
-                <li>Đọc tài khoản từ bảng `account`</li>
-                <li>Đọc nhân vật từ bảng `player`</li>
-                <li>Top sức mạnh lấy từ `player.data_point`</li>
-                <li>Top nạp lấy từ `account.tongnap`</li>
-                <li>Lịch sử thẻ lấy từ `napthe`</li>
-            </ul>
-        </div>
-    </div>
+    </section>
 </div>
 
 <?php include 'Controllers/Footer.php'; ?>

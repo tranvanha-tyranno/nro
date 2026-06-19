@@ -87,6 +87,10 @@ function checkExistingUsername($conn, $username)
 
 function checkExistingEmail($conn, $email)
 {
+    if (!webHasAccountColumn($conn, 'email')) {
+        return false;
+    }
+
     $stmt = $conn->prepare("SELECT COUNT(*) FROM account WHERE email = :email");
     $stmt->execute(['email' => $email]);
     return $stmt->fetchColumn() > 0;
@@ -94,12 +98,21 @@ function checkExistingEmail($conn, $email)
 
 function insertAccount($conn, $username, $password, $ipAddress)
 {
-    $columns = ['username', 'password', 'ip_address'];
+    $columns = ['username', 'password'];
     $params = [
         'username' => $username,
         'password' => $password,
-        'ip_address' => $ipAddress,
     ];
+
+    if (webHasAccountColumn($conn, 'ip_address')) {
+        $columns[] = 'ip_address';
+        $params['ip_address'] = $ipAddress;
+    }
+
+    if (webHasAccountColumn($conn, 'email')) {
+        $columns[] = 'email';
+        $params['email'] = '';
+    }
 
     if (webHasAccountColumn($conn, 'create_time')) {
         $columns[] = 'create_time';
@@ -109,6 +122,11 @@ function insertAccount($conn, $username, $password, $ipAddress)
     if (webHasAccountColumn($conn, 'update_time')) {
         $columns[] = 'update_time';
         $params['update_time'] = date('Y-m-d H:i:s');
+    }
+
+    if (webHasAccountColumn($conn, 'active')) {
+        $columns[] = 'active';
+        $params['active'] = 1;
     }
 
     $placeholders = [];

@@ -1,38 +1,67 @@
 <?php
 include_once '../../Controllers/Connections.php';
 include_once '../../Controllers/Sessions.php';
-include '../../Controllers/Configs.php';
+include_once '../../Controllers/Configs.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $postData = json_decode(file_get_contents('php://input'), true);
-    if (isset($postData["vnd_amount"]) && isset($postData['gold_amount']) && isset($postData["username"])) {
-        // Lấy giá trị của vnd_amount và username từ dữ liệu JSON
-        $vnd_amount = $postData["vnd_amount"];
-        $gold_amount = $postData["gold_amount"];
-        $username = $postData["username"];
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    webJsonResponse(['success' => false, 'message' => 'Yêu cầu không hợp lệ.'], 405);
+}
 
-        try {
-            // Truy vấn cơ sở dữ liệu để lấy số dư hiện tại của người dùng
-            $Vnd_New = $conn->prepare("SELECT vnd FROM account WHERE username = :username");
-            $Vnd_New->execute(['username' => $username]);
-            $Vnd_Old = $Vnd_New->fetchColumn();
-            if ($Vnd_Old >= $vnd_amount) {
-                $Update_Gold = $conn->prepare("UPDATE account SET thoi_vang = thoi_vang + :thoi_vang WHERE username = :username");
-                $Update_Gold->execute(['thoi_vang' => $gold_amount, 'username' => $username]);
+if ($_Login === null || $_Id === null) {
+    webJsonResponse(['success' => false, 'message' => 'Bạn cần đăng nhập trước.'], 401);
+}
 
-                $Update_Vnd = $conn->prepare("UPDATE account SET vnd = vnd - :vnd_amount WHERE username = :username");
-                $Update_Vnd->execute(['vnd_amount' => $vnd_amount, 'username' => $username]);
-                echo json_encode(["success" => true, "message" => "Đổi thành công $gold_amount Thỏi."]);
-            } else {
-                echo json_encode(["success" => false, "message" => "Số dư không đủ để thực hiện giao dịch."]);
-            }
-        } catch (PDOException $e) {
-            error_log("PDOException: " . $e->getMessage(), 0);
-            echo json_encode(["success" => false, "message" => "Có lỗi xảy ra. Vui lòng thử lại sau."]);
-        }
-    } else {
-        echo json_encode(["success" => false, "message" => "Dữ liệu không đủ hoặc không hợp lệ."]);
+if (!webHasAccountColumn($conn, 'vnd') || !webHasAccountColumn($conn, 'thoi_vang')) {
+    webJsonResponse(['success' => false, 'message' => 'Database thiếu cột vnd hoặc thoi_vang.'], 500);
+}
+
+$postData = json_decode(file_get_contents('php://input'), true) ?: [];
+$vndAmount = (int) ($postData['vnd_amount'] ?? 0);
+$goldRate = max(1, (int) ($_ThoiVangRate ?? 1));
+$goldMap = [
+    10000 => 50,
+    20000 => 100,
+    30000 => 150,
+    50000 => 250,
+    100000 => 500,
+    200000 => 1000,
+    500000 => 2500,
+    1000000 => 5000,
+    2000000 => 10000,
+];
+
+if (!array_key_exists($vndAmount, $goldMap)) {
+    webJsonResponse(['success' => false, 'message' => 'Mốc đổi không hợp lệ.'], 422);
+}
+
+$goldAmount = $goldMap[$vndAmount] * $goldRate;
+
+try {
+    $conn->beginTransaction();
+
+    $stmt = $conn->prepare("
+        UPDATE account
+        SET vnd = vnd - :vnd_amount,
+            thoi_vang = thoi_vang + :gold_amount
+        WHERE id = :id AND vnd >= :vnd_amount
+    ");
+    $stmt->execute([
+        'vnd_amount' => $vndAmount,
+        'gold_amount' => $goldAmount,
+        'id' => $_Id,
+    ]);
+
+    if ($stmt->rowCount() < 1) {
+        $conn->rollBack();
+        webJsonResponse(['success' => false, 'message' => 'Số dư không đủ để thực hiện giao dịch.'], 422);
     }
-} else {
-    echo json_encode(["success" => false, "message" => "Yêu cầu không hợp lệ."]);
+
+    $conn->commit();
+    webJsonResponse(['success' => true, 'message' => 'Đổi thành công ' . webFormatNumber($goldAmount) . ' thỏi.']);
+} catch (Throwable $e) {
+    if ($conn->inTransaction()) {
+        $conn->rollBack();
+    }
+    error_log('Gold exchange failed: ' . $e->getMessage());
+    webJsonResponse(['success' => false, 'message' => 'Có lỗi xảy ra. Vui lòng thử lại sau.'], 500);
 }

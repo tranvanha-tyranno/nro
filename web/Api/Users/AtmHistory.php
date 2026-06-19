@@ -1,63 +1,57 @@
 <?php
 include '../../Controllers/Connections.php';
 include '../../Controllers/Sessions.php';
-include '../../Controllers/Configs.php';
 
-if (isset($_Id)) {
-    if (!function_exists('webTableExists') || !webTableExists($conn, 'atm_lichsu')) {
-        echo '<div class="text-center" style="white-space: nowrap;">Chưa có bảng lịch sử ATM trong cơ sở dữ liệu.</div>';
-        exit;
-    }
+if ($_Login === null || $_Id === null) {
+    echo '<div class="callout callout-danger">Bạn cần đăng nhập để xem lịch sử ATM.</div>';
+    exit;
+}
 
-    $itemsPerPage = 5;
-    $stmt = $conn->prepare("SELECT * FROM atm_lichsu WHERE user_nap = :id ORDER BY thoigian DESC LIMIT $itemsPerPage");
+if (!webTableExists($conn, 'atm_lichsu')) {
+    echo '<div class="callout callout-info">Chưa có bảng lịch sử ATM trong database.</div>';
+    exit;
+}
 
-    $stmt->bindParam(":id", $_Id);
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    if (count($result) > 0) {
-        echo '<table class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th style="text-align: center;">ID</th>
-                        <th style="text-align: center;">Trạng Thái</th>
-                        <th style="text-align: center;">Số Tiền</th>
-                        <th style="text-align: center;">Mã Giao Dịch</th>
-                        <th style="text-align: center;">Ngày Tháng</th>
-                    </tr>
-                </thead>
-                <tbody>';
-        foreach ($result as $index => $row) {
-            $count = $index + 1;
-            $status = '';
-            switch ($row['status']) {
-                case 1:
-                    $status = '<span style="background-color: #28a745; color: white; padding: 5px 10px; border-radius: 10px;">Đã thanh toán</span>';
-                    break;
-                case 2:
-                    $status = '<span style="background-color: #dc3545; color: white; padding: 5px 10px; border-radius: 10px;">Chưa thanh toán</span>';
-                    break;
-                default:
-                $status = '<span style="background-color: #ffc107; color: #212529; padding: 5px 10px; border-radius: 10px;">Đang xử lý</span>';
-            }
+$stmt = $conn->prepare("SELECT * FROM atm_lichsu WHERE user_nap = :id ORDER BY thoigian DESC LIMIT 10");
+$stmt->execute(['id' => $_Id]);
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Chuyển đổi số tiền sang định dạng 50,000đ
-            $formatted_amount = number_format($row['sotien']) . 'đ';
+if (!$rows) {
+    echo '<div class="callout callout-info">Không có dữ liệu lịch sử giao dịch ATM.</div>';
+    exit;
+}
 
-            echo '
-                    <tr class="border-solid border border-transparent border-b-orange-300">
-                        <td style="text-align: center; white-space: nowrap;">' . $count . '</td>
-                        <td style="text-align: center; white-space: nowrap;">' . $status . '</td>
-                        <td style="text-align: center; white-space: nowrap;">' . $formatted_amount . '</td>
-                        <td style="text-align: center; white-space: nowrap;">' . $row['magiaodich'] . '</td>
-                        <td style="text-align: center; white-space: nowrap;">' . $row['thoigian'] . '</td>
-                    </tr>';
-        }
-        echo '</tbody></table>';
-    } else {
-        echo '<div class="text-center" style="white-space: nowrap;">Không có dữ liệu lịch sử giao dịch ATM.</div>';
-    }
-} else {
-    echo '<div class="text-center" style="white-space: nowrap;">Không tìm thấy tên người dùng trong bảng account.</div>';
+function atmStatusLabel($status): array
+{
+    return match ((int) $status) {
+        1 => ['status-ok', 'Đã thanh toán'],
+        2 => ['status-off', 'Chưa thanh toán'],
+        default => ['status-warn', 'Đang xử lý'],
+    };
 }
 ?>
+
+<table>
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Trạng thái</th>
+        <th>Số tiền</th>
+        <th>Mã giao dịch</th>
+        <th>Ngày tháng</th>
+    </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($rows as $index => $row) {
+        [$className, $label] = atmStatusLabel($row['status'] ?? 0);
+    ?>
+        <tr>
+            <td><?= $index + 1 ?></td>
+            <td><span class="status-pill <?= $className ?>"><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></span></td>
+            <td><?= webFormatCurrency($row['sotien'] ?? 0) ?></td>
+            <td><?= htmlspecialchars($row['magiaodich'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+            <td><?= htmlspecialchars($row['thoigian'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td>
+        </tr>
+    <?php } ?>
+    </tbody>
+</table>
