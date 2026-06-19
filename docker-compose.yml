@@ -1,0 +1,57 @@
+services:
+  db:
+    image: mariadb:10.4.32
+    container_name: teamobi-db
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-team2026}
+      MYSQL_USER: ${DB_USER:-team2026}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-team2026pass}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass_change_me}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./sql/nro1.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  game:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: teamobi-game
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      TZ: ${TZ:-Asia/Ho_Chi_Minh}
+      SERVER_IP: ${SERVER_IP:-127.0.0.1}
+      SERVER_PORT: ${SERVER_PORT:-14445}
+      SERVER_NAME: ${SERVER_NAME:-Local}
+      SERVER_SV: ${SERVER_SV:-1}
+      SERVER_WAITLOGIN: ${SERVER_WAITLOGIN:-3}
+      SERVER_MAXPERIP: ${SERVER_MAXPERIP:-999}
+      SERVER_MAXPLAYER: ${SERVER_MAXPLAYER:-1000}
+      SERVER_EXPSERVER: ${SERVER_EXPSERVER:-3}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-team2026}
+      DB_USER: ${DB_USER:-team2026}
+      DB_PASSWORD: ${DB_PASSWORD:-team2026pass}
+      DB_MIN: ${DB_MIN:-1}
+      DB_MAX: ${DB_MAX:-5}
+      DB_LIFETIME: ${DB_LIFETIME:-120000}
+    ports:
+      - "${SERVER_PORT:-14445}:${SERVER_PORT:-14445}/tcp"
+    volumes:
+      - game_logs:/app/logs
+
+volumes:
+  db_data:
+  game_logs:

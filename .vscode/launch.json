@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Debug local server",
+      "request": "launch",
+      "mainClass": "nro.models.server.ServerManager",
+      "cwd": "${workspaceFolder}",
+      "vmArgs": "-server -Dfile.encoding=UTF-8",
+      "classPaths": [
+        "${workspaceFolder}\\build\\classes",
+        "${workspaceFolder}\\lib\\*.jar"
+      ],
+      "preLaunchTask": "Build local server"
+    }
+  ]
+}
